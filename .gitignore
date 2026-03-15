@@ -1,0 +1,47 @@
+# Ignorar archivos innecesarios para el repositorio
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+CHANGELOG_AUTH_REDESIGN.md
+CONFIGURACION_BD.md
+DATABASE_SCHEMA.sql
+MANIFEST.md
+QUICK_START_AUTH.md
+QUICK_START.md
+START_HERE.txt
+TECHNICAL_GUIDE.md
+TEST_AUTH_REDESIGN.md
+TEST_GUIDE.md
+CHANGELOG_MEJORAS_FRONTEND.md
+DEPLOYMENT_CHECKLIST.py
+FIX_ADMIN_RLS.sql
+
+
+# Node modules (si se agrega build later)
+node_modules/
+package-lock.json
+
+# Archivos de sistema
+Thumbs.db
+.directory
+
+# Credenciales (SI LLEGAS A CREAR .env)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build outputs (si se agrega transpilación)
+dist/
+build/
+
+# Keep
+!.gitkeep

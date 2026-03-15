@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="AI Phone Advisor - Encuentra el celular perfecto con recomendaciones impulsadas por IA"
+    />
+    <meta name="author" content="AI Phone Advisor Team" />
+
+    <title>AI Phone Advisor - Recomendaciones de Celulares con IA</title>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0/dist/umd/supabase.js"></script>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- ===================================================================
+         NAVEGACIÓN Y HEADER
+         =================================================================== -->
+    <header class="navbar">
+      <div class="navbar-container">
+        <div class="navbar-brand">
+          <h1 class="brand-logo">📱 AI Phone Advisor</h1>
+          <p class="brand-tagline">
+            Inteligencia artificial para la decisión perfecta
+          </p>
+        </div>
+
+        <nav class="navbar-menu">
+          <button class="nav-btn" onclick="scrollToSection('catalog')">
+            Catálogo
+          </button>
+          <button class="nav-btn" onclick="scrollToSection('comparator')">
+            Comparador
+          </button>
+          <button class="nav-btn" onclick="openChatbot()">💬 Chatbot IA</button>
+          <button
+            class="nav-btn nav-account"
+            id="authBtn"
+            onclick="toggleAuthModal()"
+          >
+            Entrar
+          </button>
+          <span id="userBadge" class="user-badge" style="display: none"></span>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ===================================================================
+         SECCIÓN HERO
+         =================================================================== -->
+    <section class="hero">
+      <div class="hero-content">
+        <h2>Encuentra el Celular Perfecto</h2>
+        <p>
+          Compara especificaciones, lee reseñas y consulta a nuestro asistente
+          de IA en tiempo real
+        </p>
+        <button class="cta-button" onclick="scrollToSection('catalog')">
+          Explorar Catálogo
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         CATÁLOGO DE CELULARES
+         =================================================================== -->
+    <section id="catalog" class="section">
+      <div class="section-container">
+        <h2 class="section-title">Catálogo de Dispositivos</h2>
+
+        <!-- Filtros -->
+        <div class="filters-container">
+          <div class="filter-group">
+            <label for="filterBrand">Marca:</label>
+            <select id="filterBrand" onchange="applyFilters()">
+              <option value="">Todas</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterPrice">Precio máximo ($USD):</label>
+            <input
+              type="range"
+              id="filterPrice"
+              min="0"
+              max="2000"
+              value="2000"
+              onchange="applyFilters()"
+              class="range-slider"
+            />
+            <span id="priceDisplay">$2000</span>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterSort">Ordenar por:</label>
+            <select id="filterSort" onchange="applyFilters()">
+              <option value="newest">Más Recientes</option>
+              <option value="price-asc">Precio: Menor a Mayor</option>
+              <option value="price-desc">Precio: Mayor a Menor</option>
+              <option value="rating">Mejor Valorados</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grid de Productos -->
+        <div id="phoneGrid" class="phone-grid">
+          <!-- Los productos se renderean aquí dinámicamente -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         COMPARADOR VISUAL
+         =================================================================== -->
+    <section id="comparator" class="section section-alt">
+      <div class="section-container">
+        <h2 class="section-title">Comparador Visual</h2>
+        <p class="section-subtitle">
+          Selecciona 2-3 teléfonos para compararlos en detalle
+        </p>
+
+        <div class="comparator-wrapper">
+          <!-- Área de selección -->
+          <div class="comparator-selection">
+            <h3>Selecciona Dispositivos</h3>
+            <div id="comparatorDeviceSelect" class="device-select-grid">
+              <!-- Se rellena dinámicamente -->
+            </div>
+            <button
+              class="btn-compare"
+              style="color: #1a1c1e"
+              onclick="startComparison()"
+            >
+              Comparar Seleccionados
+            </button>
+            <button class="btn-clear" onclick="clearComparison()">
+              Limpiar
+            </button>
+          </div>
+
+          <!-- Área de comparación -->
+          <div
+            id="comparisonResults"
+            class="comparison-results"
+            style="display: none"
+          >
+            <h3>Comparación de Especificaciones</h3>
+            <div class="comparison-charts">
+              <div id="radarChartContainer" class="chart-container">
+                <canvas id="radarChart"></canvas>
+              </div>
+              <div id="comparisonTable" class="comparison-table-wrapper">
+                <!-- Tabla de comparación -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         MODAL: AUTENTICACIÓN - REDISEÑADO (Moderno & Responsive)
+         =================================================================== -->
+    <div id="authModal" class="modal auth-modal">
+      <div class="modal-content auth-modal-content">
+        <!-- Botón cerrar -->
+        <button
+          class="modal-close auth-modal-close"
+          onclick="toggleAuthModal()"
+        >
+          ✕
+        </button>
+
+        <!-- Container con dos secciones -->
+        <div class="auth-container">
+          <!-- Sección Izquierda: Branding (Desktop) / Info (Mobile) -->
+          <div class="auth-brand-section">
+            <div class="auth-brand-content">
+              <h1 class="auth-brand-title">📱 AI Phone Advisor</h1>
+              <p class="auth-brand-subtitle">
+                Encuentra tu celular perfecto con inteligencia artificial
+              </p>
+              <div class="auth-brand-features">
+                <div class="feature-item">
+                  <span class="feature-icon">🔍</span>
+                  <span>Comparación inteligente</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-icon">⭐</span>
+                  <span>Reseñas de usuarios</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-icon">🤖</span>
+                  <span>Asistencia IA 24/7</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección Derecha: Formularios -->
+          <div class="auth-form-section">
+            <!-- TAB: LOGIN -->
+            <div id="authForm" class="auth-form-wrapper active">
+              <div class="auth-form-header">
+                <h2>Bienvenido</h2>
+                <p>Inicia sesión para continuar</p>
+              </div>
+
+              <form class="auth-form" onsubmit="handleSignInForm(event)">
+                <!-- Campo Email -->
+                <div class="form-group auth-form-group">
+                  <label for="authEmail" class="form-label">
+                    <span class="label-icon">✉️</span>
+                    Correo Electrónico
+                  </label>
+                  <input
+                    type="email"
+                    id="authEmail"
+                    class="form-input auth-input"
+                    placeholder="ejemplo@email.com"
+                    required
+                  />
+                  <span class="form-help">
+                    Tu correo es seguro con nosotros
+                  </span>
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="form-group auth-form-group">
+                  <label for="authPassword" class="form-label">
+                    <span class="label-icon">🔐</span>
+                    Contraseña
+                  </label>
+                  <div class="password-field">
+                    <input
+                      type="password"
+                      id="authPassword"
+                      class="form-input auth-input"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      onclick="togglePasswordVisibility('authPassword')"
+                    >
+                      👁️
+                    </button>
+                  </div>
+                  <span class="form-help"> Mínimo 6 caracteres </span>
+                </div>
+
+                <!-- Mensaje de error -->
+                <div id="authErrorMessage" class="error-message"></div>
+
+                <!-- Botón Submit -->
+                <button type="submit" class="btn-primary auth-submit-btn">
+                  <span class="btn-text">Entrar a mi Cuenta</span>
+                  <span class="btn-icon">→</span>
+                </button>
+              </form>
+
+              <!-- Toggle a Registro -->
+              <div class="auth-toggle-section">
+                <p class="auth-toggle-text">
+                  ¿Aún no tienes cuenta?
+                  <button
+                    type="button"
+                    class="auth-toggle-link"
+                    onclick="toggleAuthMode()"
+                  >
+                    Crear una nueva
+                  </button>
+                </p>
+              </div>
+
+              <!-- Social / Extra -->
+              <div class="auth-separator">
+                <span>o continúa de otra forma</span>
+              </div>
+              <p class="auth-info-text">
+                🔒 Tus datos están protegidos con encriptación de nivel
+                empresarial
+              </p>
+            </div>
+
+            <!-- TAB: REGISTRO -->
+            <div id="signupForm" class="auth-form-wrapper">
+              <div class="auth-form-header">
+                <h2>Crear Cuenta</h2>
+                <p>Únete a nuestra comunidad</p>
+              </div>
+
+              <form class="auth-form" onsubmit="handleSignUpForm(event)">
+                <!-- Campo Nombre -->
+                <div class="form-group auth-form-group">
+                  <label for="signupName" class="form-label">
+                    <span class="label-icon">👤</span>
+                    Nombre Completo
+                  </label>
+                  <input
+                    type="text"
+                    id="signupName"
+                    class="form-input auth-input"
+                    placeholder="Juan Pérez"
+                    required
+                  />
+                  <span class="form-help">
+                    Tu nombre será visible en tus comentarios
+                  </span>
+                </div>
+
+                <!-- Campo Email -->
+                <div class="form-group auth-form-group">
+                  <label for="signupEmail" class="form-label">
+                    <span class="label-icon">✉️</span>
+                    Correo Electrónico
+                  </label>
+                  <input
+                    type="email"
+                    id="signupEmail"
+                    class="form-input auth-input"
+                    placeholder="ejemplo@email.com"
+                    required
+                  />
+                  <span class="form-help">
+                    Usaremos esto para confirmar tu cuenta
+                  </span>
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="form-group auth-form-group">
+                  <label for="signupPassword" class="form-label">
+                    <span class="label-icon">🔐</span>
+                    Contraseña
+                  </label>
+                  <div class="password-field">
+                    <input
+                      type="password"
+                      id="signupPassword"
+                      class="form-input auth-input"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      onclick="togglePasswordVisibility('signupPassword')"
+                    >
+                      👁️
+                    </button>
+                  </div>
+                  <span class="form-help">
+                    Mínimo 6 caracteres. Usa mayúsculas, números y símbolos para
+                    más seguridad
+                  </span>
+                </div>
+
+                <!-- Mensaje de error -->
+                <div id="signupErrorMessage" class="error-message"></div>
+
+                <!-- Términos -->
+                <div class="auth-terms">
+                  <input type="checkbox" id="agreeTerms" required />
+                  <label for="agreeTerms" class="terms-label">
+                    Acepto los
+                    <a href="#" onclick="return false;">Términos de Servicio</a>
+                    y la
+                    <a href="#" onclick="return false;"
+                      >Política de Privacidad</a
+                    >
+                  </label>
+                </div>
+
+                <!-- Botón Submit -->
+                <button type="submit" class="btn-primary auth-submit-btn">
+                  <span class="btn-text">Crear mi Cuenta</span>
+                  <span class="btn-icon">→</span>
+                </button>
+              </form>
+
+              <!-- Toggle a Login -->
+              <div class="auth-toggle-section">
+                <p class="auth-toggle-text">
+                  ¿Ya tienes una cuenta?
+                  <button
+                    type="button"
+                    class="auth-toggle-link"
+                    onclick="toggleAuthMode()"
+                  >
+                    Inicia sesión aquí
+                  </button>
+                </p>
+              </div>
+
+              <div class="auth-separator">
+                <span>¿Dudas sobre el registro?</span>
+              </div>
+              <p class="auth-info-text">
+                📧 Te enviaremos un email de confirmación. Revisa tu bandeja de
+                entrada
+              </p>
+            </div>
+
+            <!-- TAB: PERFIL (Usuario Autenticado) -->
+            <div id="userProfile" class="auth-form-wrapper">
+              <div class="auth-form-header">
+                <h2>Mi Perfil</h2>
+                <p>Gestiona tu cuenta</p>
+              </div>
+
+              <div class="user-profile-content">
+                <div class="user-avatar">
+                  <span>👤</span>
+                </div>
+                <div class="user-info">
+                  <p class="user-email-label">Correo registrado:</p>
+                  <p id="userEmail" class="user-email-value"></p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="btn-primary auth-submit-btn"
+                onclick="handleSignOut()"
+              >
+                <span class="btn-text">🚪 Cerrar Sesión</span>
+                <span class="btn-icon">→</span>
+              </button>
+
+              <p class="auth-info-text">✅ Sesión activa y segura</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL: DETALLES DE PRODUCTO
+         =================================================================== -->
+    <div id="phoneDetailModal" class="modal">
+      <div class="modal-content modal-large">
+        <button class="modal-close" onclick="closePhoneModal()">✕</button>
+
+        <div class="modal-phone-layout">
+          <!-- Información del teléfono -->
+          <div class="phone-info-section">
+            <h2 id="phoneModalTitle"></h2>
+            <div id="phoneModalSpecs" class="specs-grid">
+              <!-- Especificaciones dinámicas -->
+            </div>
+
+            <!-- Sistema de Semáforo -->
+            <div class="traffic-light-system">
+              <h3>📊 Análisis Rápido</h3>
+              <div id="trafficLight" class="traffic-light-container">
+                <!-- Se genera dinámicamente -->
+              </div>
+            </div>
+
+            <!-- Badges de Estilo de Vida -->
+            <div class="lifestyle-badges">
+              <h3>💡 Ideal Para...</h3>
+              <div id="lifestyleBadges" class="badges-container">
+                <!-- Se genera dinámicamente -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección de Comentarios -->
+          <div class="comments-section">
+            <h3>Comentarios de Usuarios</h3>
+
+            <!-- Formulario de nuevo comentario (solo usuarios autenticados) -->
+            <div id="commentFormContainer" style="display: none">
+              <form class="comment-form" onsubmit="submitComment(event)">
+                <div class="form-group">
+                  <label for="commentTitle">Título:</label>
+                  <input
+                    type="text"
+                    id="commentTitle"
+                    required
+                    maxlength="100"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="commentContent">Comentario:</label>
+                  <textarea
+                    id="commentContent"
+                    required
+                    maxlength="500"
+                    rows="4"
+                  ></textarea>
+                </div>
+
+                <div class="ratings-grid">
+                  <div class="rating-input">
+                    <label>Puntuación General:</label>
+                    <div class="stars" id="ratingOverall">
+                      <span class="star" data-value="1">⭐</span>
+                      <span class="star" data-value="2">⭐</span>
+                      <span class="star" data-value="3">⭐</span>
+                      <span class="star" data-value="4">⭐</span>
+                      <span class="star" data-value="5">⭐</span>
+                    </div>
+                    <input type="hidden" id="ratingOverallValue" value="0" />
+                  </div>
+
+                  <div class="rating-input">
+                    <label>Cámara:</label>
+                    <div class="stars" id="ratingCamera">
+                      <span class="star" data-value="1">⭐</span>
+                      <span class="star" data-value="2">⭐</span>
+                      <span class="star" data-value="3">⭐</span>
+                      <span class="star" data-value="4">⭐</span>
+                      <span class="star" data-value="5">⭐</span>
+                    </div>
+                    <input type="hidden" id="ratingCameraValue" value="0" />
+                  </div>
+
+                  <div class="rating-input">
+                    <label>Batería:</label>
+                    <div class="stars" id="ratingBattery">
+                      <span class="star" data-value="1">⭐</span>
+                      <span class="star" data-value="2">⭐</span>
+                      <span class="star" data-value="3">⭐</span>
+                      <span class="star" data-value="4">⭐</span>
+                      <span class="star" data-value="5">⭐</span>
+                    </div>
+                    <input type="hidden" id="ratingBatteryValue" value="0" />
+                  </div>
+
+                  <div class="rating-input">
+                    <label>Desempeño:</label>
+                    <div class="stars" id="ratingPerformance">
+                      <span class="star" data-value="1">⭐</span>
+                      <span class="star" data-value="2">⭐</span>
+                      <span class="star" data-value="3">⭐</span>
+                      <span class="star" data-value="4">⭐</span>
+                      <span class="star" data-value="5">⭐</span>
+                    </div>
+                    <input
+                      type="hidden"
+                      id="ratingPerformanceValue"
+                      value="0"
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                  Publicar Comentario
+                </button>
+              </form>
+            </div>
+
+            <!-- Lista de comentarios -->
+            <div id="commentsList" class="comments-list">
+              <!-- Se rellena dinámicamente -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL: FORMULARIO DE SOLICITUD DE NUEVO MODELO
+         =================================================================== -->
+    <div id="featureRequestModal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="toggleFeatureRequestModal()">
+          ✕
+        </button>
+        <h2>Solicitar Nuevo Modelo</h2>
+
+        <form
+          class="feature-request-form"
+          onsubmit="submitFeatureRequest(event)"
+        >
+          <div class="form-group">
+            <label for="requestBrand">Marca:</label>
+            <input
+              type="text"
+              id="requestBrand"
+              required
+              placeholder="ej: Samsung"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="requestModel">Modelo:</label>
+            <input
+              type="text"
+              id="requestModel"
+              required
+              placeholder="ej: Galaxy S24"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="requestReason">¿Por qué lo deseas?</label>
+            <textarea
+              id="requestReason"
+              required
+              maxlength="300"
+              rows="4"
+              placeholder="Cuéntanos por qué te gustaría ver este modelo"
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary">Enviar Solicitud</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         MODAL: ADMINISTRADOR - CRUD DE CELULARES
+         =================================================================== -->
+    <div id="adminModal" class="modal">
+      <div class="modal-content modal-large">
+        <button class="modal-close" onclick="closeAdminModal()">✕</button>
+        <h2>Panel de Administrador</h2>
+
+        <div class="admin-tabs">
+          <button class="tab-btn active" onclick="switchAdminTab('manage')">
+            Gestionar Celulares
+          </button>
+          <button class="tab-btn" onclick="switchAdminTab('requests')">
+            Solicitudes de Usuarios
+          </button>
+          <button class="tab-btn" onclick="switchAdminTab('comments')">
+            Comentarios
+          </button>
+        </div>
+
+        <!-- Tab: Gestionar Celulares -->
+        <div id="adminManageTab" class="admin-tab active">
+          <h3>CRUD de Celulares</h3>
+
+          <form
+            id="phoneForm"
+            class="admin-form"
+            onsubmit="handlePhoneCRUD(event)"
+          >
+            <input type="hidden" id="phoneFormId" />
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" id="formPhoneName" required />
+              </div>
+
+              <div class="form-group">
+                <label>Marca:</label>
+                <input type="text" id="formPhoneBrand" required />
+              </div>
+
+              <div class="form-group">
+                <label>Modelo:</label>
+                <input type="text" id="formPhoneModel" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Precio (USD):</label>
+                <input type="number" id="formPhonePrice" step="0.01" required />
+              </div>
+
+              <div class="form-group">
+                <label>Año de Lanzamiento:</label>
+                <input
+                  type="number"
+                  id="formPhoneYear"
+                  min="2010"
+                  max="2030"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>RAM (GB):</label>
+                <input
+                  type="number"
+                  id="formPhoneRam"
+                  min="1"
+                  max="24"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Almacenamiento (GB):</label>
+                <input
+                  type="number"
+                  id="formPhoneStorage"
+                  min="32"
+                  max="1000"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Batería (mAh):</label>
+                <input
+                  type="number"
+                  id="formPhoneBattery"
+                  min="2000"
+                  max="7000"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Cámara Principal (MP):</label>
+                <input
+                  type="number"
+                  id="formPhoneCamera"
+                  min="1"
+                  max="200"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Cámara Frontal (MP):</label>
+                <input
+                  type="number"
+                  id="formPhoneSelfieCam"
+                  min="1"
+                  max="100"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Procesador:</label>
+                <input
+                  type="text"
+                  id="formPhoneProcessor"
+                  placeholder="ej: A17 Pro"
+                  required
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Guardar Celular</button>
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="resetPhoneForm()"
+            >
+              Limpiar Formulario
+            </button>
+          </form>
+
+          <h3 style="margin-top: 2rem">Teléfonos Registrados</h3>
+          <table id="phonesTable" class="admin-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Marca</th>
+                <th>Precio</th>
+                <th>RAM</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Se llena dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tab: Solicitudes -->
+        <div id="adminRequestsTab" class="admin-tab">
+          <h3>Solicitudes de Nuevos Modelos</h3>
+          <table id="requestsTable" class="admin-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Razón</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Se llena dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tab: Comentarios -->
+        <div id="adminCommentsTab" class="admin-tab">
+          <h3>Gestión de Comentarios</h3>
+          <table id="commentsTable" class="admin-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Teléfono</th>
+                <th>Comentario</th>
+                <th>Publicado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Se llena dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         FOOTER
+         =================================================================== -->
+    <footer class="footer">
+      <div class="footer-content">
+        <p>&copy; 2026 AI Phone Advisor. Todos los derechos reservados.</p>
+        <p>Potenciado por Supabase y Chatbase</p>
+      </div>
+    </footer>
+
+    <!-- ===================================================================
+         SCRIPTS
+         =================================================================== -->
+    <script src="supabase-config.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
