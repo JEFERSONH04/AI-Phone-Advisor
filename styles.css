@@ -1955,6 +1955,298 @@ textarea {
 }
 
 /* ============================================================================
+   FORMULARIO DE SOLICITUD DE NUEVOS MODELOS (FORMSPREE)
+   ============================================================================ */
+
+.model-request-wrapper {
+  max-width: 700px;
+  margin: 0 auto;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.model-request-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.model-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.model-form-group .form-label {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.model-form-group .label-icon {
+  font-size: 1.25rem;
+  display: inline-flex;
+}
+
+.model-input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-base);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-base);
+  font-family: var(--font-family);
+}
+
+.model-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+  box-shadow: 0 0 0 3px rgba(212, 255, 51, 0.1);
+}
+
+.model-input:disabled,
+.model-input[readonly] {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-help {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-top: -var(--spacing-xs);
+}
+
+.model-form-actions {
+  display: flex;
+  gap: var(--spacing-base);
+  margin-top: var(--spacing-base);
+}
+
+.model-submit-btn {
+  min-height: 50px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  transition: all var(--transition-base);
+}
+
+.model-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(212, 255, 51, 0.2);
+}
+
+.model-submit-btn:active {
+  transform: translateY(0);
+}
+
+.model-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mensajes de Estado */
+
+.form-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-base);
+  margin-top: var(--spacing-lg);
+  animation: slideInDown 0.4s ease-out;
+}
+
+.form-status p {
+  margin: 0;
+  font-weight: 600;
+  color: inherit;
+}
+
+.status-icon,
+.loading-spinner {
+  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.loading-spinner {
+  animation: spin 1.5s linear infinite;
+}
+
+.status-detail {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  opacity: 0.85;
+  margin-top: var(--spacing-xs);
+}
+
+.form-success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.form-error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.form-loading {
+  background: rgba(102, 153, 255, 0.15);
+  border: 1px solid rgba(102, 153, 255, 0.3);
+  color: #6699ff;
+}
+
+/* Mensaje de Autenticación Requerida */
+
+.auth-required-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+}
+
+.auth-icon {
+  font-size: 3rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.auth-required-message p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.auth-required-message .btn-secondary {
+  margin-top: var(--spacing-base);
+}
+
+/* Animaciones */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsiva: Tablet y Móvil */
+
+@media (max-width: 768px) {
+  .model-request-wrapper {
+    padding: var(--spacing-lg);
+  }
+
+  .model-input {
+    padding: var(--spacing-md) var(--spacing-base);
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+
+  .model-submit-btn {
+    min-height: 48px;
+    font-size: var(--font-size-sm);
+  }
+
+  .form-status {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--spacing-base);
+  }
+
+  .form-status p {
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .auth-required-message {
+    padding: var(--spacing-lg);
+  }
+
+  .auth-icon {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .model-request-wrapper {
+    padding: var(--spacing-base);
+    border-radius: var(--border-radius-base);
+  }
+
+  .model-form-group {
+    gap: var(--spacing-xs);
+  }
+
+  .model-form-group .form-label {
+    font-size: var(--font-size-sm);
+  }
+
+  .model-input {
+    padding: var(--spacing-base);
+    border-radius: var(--border-radius-sm);
+  }
+
+  .model-submit-btn {
+    min-height: 44px;
+    font-size: var(--font-size-sm);
+  }
+
+  .form-status {
+    padding: var(--spacing-base);
+  }
+
+  .status-icon,
+  .loading-spinner {
+    font-size: 1.25rem;
+  }
+}
+
+/* ============================================================================
    MODO OSCURO PROFUNDO (Default)
    Los colores ya están configurados para modo oscuro
    ============================================================================ */

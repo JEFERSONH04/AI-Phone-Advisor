@@ -70,6 +70,9 @@
           <button class="nav-btn" onclick="scrollToSection('comparator')">
             Comparador
           </button>
+          <button class="nav-btn" onclick="scrollToSection('modelRequestSection')">
+            Sugerir Modelo
+          </button>
           <button
             class="nav-btn nav-account"
             id="authBtn"
@@ -190,6 +193,130 @@
                 <!-- Tabla de comparación -->
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SECCIÓN: FORMULARIO DE SOLICITUD DE NUEVOS MODELOS (FORMSPREE)
+         =================================================================== -->
+    <section id="modelRequestSection" class="section section-alt" style="display: none">
+      <div class="section-container">
+        <h2 class="section-title">💡 Sugiere un Nuevo Modelo</h2>
+        <p class="section-subtitle">
+          ¿No encuentras el celular que buscas? Comparte tu recomendación con nuestro equipo
+        </p>
+
+        <div class="model-request-wrapper">
+          <form
+            id="modelRequestForm"
+            class="model-request-form"
+            method="POST"
+            action="https://formspree.io/f/mojkypkq"
+          >
+            <!-- Nombre del Celular -->
+            <div class="form-group model-form-group">
+              <label for="modelName" class="form-label">
+                <span class="label-icon">📱</span>
+                Nombre del Celular *
+              </label>
+              <input
+                type="text"
+                id="modelName"
+                name="model_name"
+                class="form-input model-input"
+                placeholder="ej: Galaxy Z Fold 6"
+                required
+              />
+              <span class="form-help">Nombre comercial del dispositivo</span>
+            </div>
+
+            <!-- Marca -->
+            <div class="form-group model-form-group">
+              <label for="modelBrand" class="form-label">
+                <span class="label-icon">🏢</span>
+                Marca *
+              </label>
+              <input
+                type="text"
+                id="modelBrand"
+                name="brand"
+                class="form-input model-input"
+                placeholder="ej: Samsung"
+                required
+              />
+              <span class="form-help">Fabricante del dispositivo</span>
+            </div>
+
+            <!-- Enlace de Referencia (Opcional) -->
+            <div class="form-group model-form-group">
+              <label for="modelLink" class="form-label">
+                <span class="label-icon">🔗</span>
+                Enlace de Referencia
+              </label>
+              <input
+                type="url"
+                id="modelLink"
+                name="reference_link"
+                class="form-input model-input"
+                placeholder="https://ejemplo.com/producto"
+              />
+              <span class="form-help">Enlace al sitio del fabricante o reseña</span>
+            </div>
+
+            <!-- Correo del Usuario (Readonly, Auto-completado) -->
+            <div class="form-group model-form-group">
+              <label for="userEmail" class="form-label">
+                <span class="label-icon">✉️</span>
+                Tu Correo (Auto-rellenado)
+              </label>
+              <input
+                type="email"
+                id="userEmail"
+                name="user_email"
+                class="form-input model-input"
+                readonly
+                placeholder="correo@ejemplo.com"
+              />
+              <span class="form-help">Tu correo registrado en la plataforma</span>
+            </div>
+
+            <!-- Contenedor de Botón y Mensajes -->
+            <div class="model-form-actions">
+              <button type="submit" class="btn-primary model-submit-btn">
+                <span class="btn-text">📤 Enviar Solicitud</span>
+                <span class="btn-icon">→</span>
+              </button>
+            </div>
+
+            <!-- Mensaje de Carga -->
+            <div id="modelFormLoading" class="form-status form-loading" style="display: none">
+              <span class="loading-spinner">⏳</span>
+              <p>Enviando tu solicitud...</p>
+            </div>
+
+            <!-- Mensaje de Éxito -->
+            <div id="modelFormSuccess" class="form-status form-success" style="display: none">
+              <span class="status-icon">✅</span>
+              <p>¡Petición enviada con éxito!</p>
+              <span class="status-detail">Nuestro equipo revisará tu sugerencia pronto</span>
+            </div>
+
+            <!-- Mensaje de Error -->
+            <div id="modelFormError" class="form-status form-error" style="display: none">
+              <span class="status-icon">❌</span>
+              <p id="modelFormErrorMessage">Error al enviar la solicitud. Intenta de nuevo.</p>
+            </div>
+          </form>
+
+          <!-- Mensaje para usuarios no autenticados -->
+          <div id="modelFormNotAuthenticated" class="auth-required-message" style="display: none">
+            <span class="auth-icon">🔐</span>
+            <p>Inicia sesión para sugerir nuevos modelos</p>
+            <button class="btn-secondary" onclick="toggleAuthModal()">
+              Entrar a Mi Cuenta
+            </button>
           </div>
         </div>
       </div>

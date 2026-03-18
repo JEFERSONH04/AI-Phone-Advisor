@@ -78,6 +78,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ========================================================================
   ensureCommentTableStructure();
 
+  // ========================================================================
+  // [NUEVA] Inicializar formulario de solicitud de nuevos modelos
+  // ========================================================================
+  initModelRequestForm();
+  
   // Configurar event listeners
   setupEventListeners();
 
@@ -1896,6 +1901,203 @@ async function deleteComment(commentId) {
   } catch (error) {
     console.error("Error al eliminar comentario:", error);
     showNotification("Error al eliminar", "error");
+  }
+}
+
+// ============================================================================
+// FORMULARIO DE SOLICITUD VÍA FORMSPREE (AJAX)
+// ============================================================================
+
+/**
+ * Inicializa el formulario de solicitud de nuevos modelos
+ * Maneja visibilidad, auto-complete de email, y envío vía AJAX
+ */
+function initModelRequestForm() {
+  const section = document.getElementById("modelRequestSection");
+  const form = document.getElementById("modelRequestForm");
+  const userEmailInput = document.getElementById("userEmail");
+  const notAuthMessage = document.getElementById("modelFormNotAuthenticated");
+  
+  if (!form) {
+    console.warn("⚠️ Formulario de solicitud de modelos no encontrado");
+    return;
+  }
+
+  // ========================================================================
+  // 1. MOSTRAR/OCULTAR SECCIÓN SEGÚN AUTENTICACIÓN
+  // ========================================================================
+  function updateFormVisibility() {
+    if (AppState.currentUser) {
+      // Usuario autenticado: mostrar formulario
+      section.style.display = "block";
+      form.style.display = "block";
+      notAuthMessage.style.display = "none";
+      
+      // Auto-completar email del usuario
+      userEmailInput.value = AppState.currentUser.email || "";
+      
+      console.debug("✅ Formulario de solicitud visible para usuario autenticado");
+    } else {
+      // Usuario NO autenticado: mostrar mensaje
+      section.style.display = "block";
+      form.style.display = "none";
+      notAuthMessage.style.display = "flex";
+      userEmailInput.value = "";
+      
+      console.debug("ℹ️ Formulario de solicitud oculto - Usuario no autenticado");
+    }
+  }
+
+  // ========================================================================
+  // 2. MANEJO DE ENVÍO AJAX CON FORMSPREE
+  // ========================================================================
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    // Validar que el usuario está autenticado
+    if (!AppState.currentUser) {
+      showNotification("Por favor inicia sesión", "error");
+      return;
+    }
+
+    // Recopilar datos del formulario
+    const formData = new FormData(form);
+    const modelName = formData.get("model_name")?.trim();
+    const brand = formData.get("brand")?.trim();
+    const referenceLink = formData.get("reference_link")?.trim();
+    const userEmail = formData.get("user_email")?.trim();
+
+    // ====================================================================
+    // Validación básica
+    // ====================================================================
+    if (!modelName || !brand || !userEmail) {
+      showModelFormError("Por favor completa todos los campos obligatorios");
+      return;
+    }
+
+    if (modelName.length < 2) {
+      showModelFormError("El nombre del celular debe tener al menos 2 caracteres");
+      return;
+    }
+
+    if (brand.length < 2) {
+      showModelFormError("La marca debe tener al menos 2 caracteres");
+      return;
+    }
+
+    // Validar URL si está presente
+    if (referenceLink && !isValidUrl(referenceLink)) {
+      showModelFormError("Por favor ingresa una URL válida");
+      return;
+    }
+
+    try {
+      // ================================================================
+      // Mostrar indicador de carga
+      // ================================================================
+      const loadingEl = document.getElementById("modelFormLoading");
+      const successEl = document.getElementById("modelFormSuccess");
+      const errorEl = document.getElementById("modelFormError");
+      const submitBtn = form.querySelector(".model-submit-btn");
+
+      // Ocultar mensajes previos
+      loadingEl.style.display = "none";
+      successEl.style.display = "none";
+      errorEl.style.display = "none";
+
+      // Deshabilitar botón y mostrar carga
+      submitBtn.disabled = true;
+      loadingEl.style.display = "flex";
+
+      // ================================================================
+      // Enviar datos a Formspree vía AJAX
+      // ================================================================
+      const response = await fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al enviar el formulario");
+      }
+
+      // ================================================================
+      // Éxito: mostrar mensaje y limpiar campo
+      // ================================================================
+      loadingEl.style.display = "none";
+      successEl.style.display = "flex";
+      
+      // Limpiar campos del formulario (excepto email que es readonly)
+      form.reset();
+      userEmailInput.value = AppState.currentUser.email;
+
+      // Ocultar mensaje de éxito después de 5 segundos
+      setTimeout(() => {
+        successEl.style.display = "none";
+      }, 5000);
+
+      console.debug("✅ Solicitud enviada exitosamente a Formspree");
+    } catch (error) {
+      console.error("❌ Error al enviar formulario:", error);
+      showModelFormError(
+        error.message || "Error al enviar la solicitud. Intenta de nuevo."
+      );
+    } finally {
+      // ================================================================
+      // Rehabilitar botón
+      // ================================================================
+      const submitBtn = form.querySelector(".model-submit-btn");
+      submitBtn.disabled = false;
+      document.getElementById("modelFormLoading").style.display = "none";
+    }
+  });
+
+  // ========================================================================
+  // 3. ESCUCHAR CAMBIOS EN LA SESIÓN DE AUTENTICACIÓN
+  // ========================================================================
+  // Llamar inmediatamente para establecer el estado inicial
+  updateFormVisibility();
+
+  //Escuchar cambios de autenticación (se amplía en el setupEventListeners)
+  const originalUpdateAuthUI = window.updateAuthUI || (() => {});
+  window.updateAuthUI = function() {
+    originalUpdateAuthUI();
+    updateFormVisibility();
+  };
+
+  console.debug("✅ Formulario de solicitud de modelos inicializado");
+}
+
+/**
+ * Valida si una cadena es una URL válida
+ */
+function isValidUrl(string) {
+  try {
+    new URL(string);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
+ * Muestra un mensaje de error en el formulario de solicitud
+ */
+function showModelFormError(message) {
+  const errorEl = document.getElementById("modelFormError");
+  const errorMsg = document.getElementById("modelFormErrorMessage");
+  
+  if (errorEl && errorMsg) {
+    errorMsg.textContent = message;
+    errorEl.style.display = "flex";
+    
+    // Auto-ocultar después de 5 segundos
+    setTimeout(() => {
+      errorEl.style.display = "none";
+    }, 5000);
   }
 }
 
